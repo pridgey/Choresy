@@ -1,0 +1,110 @@
+@font-face {
+  font-family: "Quicksand";
+  src: url("/fonts/Quicksand/Quicksand-VariableFont_wght.ttf")
+    format("truetype");
+}
+
+body {
+  margin: 0;
+  font-family: "Quicksand", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-primary);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+:root,
+.light-override {
+  /* Color Pallete */
+  --color-primary: #118ab2;
+  --color-secondary: #2b3a67;
+  --color-tertiary: #0ad3ff;
+  --color-success: #8fc93a;
+  --color-error: #ef476f;
+  --color-gray: #87a0b2;
+  --color-fullwhite: #ffffff;
+  --color-fullblack: #080808;
+  --color-white: #f1fffa;
+  --color-black: #252627;
+  --color-transparent-white: rgba(255, 255, 255, 0.6);
+  --color-transparent-black: rgba(0, 0, 0, 0.6);
+  --color-backdrop: var(--color-transparent-black);
+  --color-backdrop-invert: var(--color-transparent-white);
+  --color-text: var(--color-black);
+  --color-fullbackground: var(--color-fullwhite);
+  --color-fullforeground: var(--color-fullblack);
+  --color-background: var(--color-white);
+  --color-foreground: var(--color-black);
+  --color-darken: 80%;
+  --color-darken-2: 70%;
+  --color-lighten: 120%;
+  --color-lighten-2: 130%;
+  /* Border-Radii (handled by rem) */
+  --border-radius: 0.75rem;
+  --border-radius-large: 1rem;
+  --border-radius-huge: 2rem;
+  --border-radius-inset: 0.5rem;
+  /* Box-Shadow */
+  --shadow-color: rgba(0, 0, 0, 0.25);
+  --box-shadow-small: 0px 3px 3px 0px var(--shadow-color);
+  --box-shadow-medium: 0px 3px 8px 0px var(--shadow-color);
+  /* Spacing (handled by rem) */
+  --spacing-mini: 0.5rem;
+  --spacing-small: 1rem;
+  --spacing-medium: 1.5rem;
+  --spacing-large: 4rem;
+  --spacing-extra-large: 8rem;
+  /* Font Family */
+  --font-family: "Quicksand", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  /* Font Sizes (handled by rem) */
+  font-size: 8px;
+  --font-size-mini: 1.5rem; /* 8px */
+  --font-size-small: 1.85rem; /* 12px */
+  --font-size-text: 2.15rem; /* 16px */
+  --font-size-header: 2.5rem; /* 24px */
+  --font-size-large: 3rem; /* 32px */
+  --font-size-extra-large: 5rem; /* 40px */
+  --font-size-jumbo: 7rem; /* 56px */
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-semibold: 500;
+  --font-weight-bold: 700;
+  /* Line Heights */
+  --line-height-small: 1.25em;
+  --line-height-medium: 1.5em;
+  --line-height-large: 1.75em;
+  /* Toast Override */
+  --sn-toast-font-size: var(--font-size-tetxt);
+  --sn-dismiss-btn-size: 2rem;
+}
+
+.dark-override {
+  --color-background: var(--color-black);
+  --color-foreground: var(--color-white);
+  --color-fullbackground: var(--color-fullblack);
+  --color-fullforeground: var(--color-fullwhite);
+  --color-backdrop: var(--color-transparent-white);
+  --color-backdrop-invert: var(--color-transparent-black);
+  --color-gray: #625a59;
+  --color-text: var(--color-white);
+  --color-darken: 120%;
+  --color-darken-2: 130%;
+  --color-lighten: 80%;
+  --color-lighten-2: 70%;
+  --shadow-color: rgba(0, 0, 0, 0.75);
+}

@@ -1,0 +1,82 @@
+.container {
+  display: grid;
+  grid-template-columns: 50px 1fr 0.2fr;
+  grid-template-rows: min-content;
+  grid-template-areas: "place title votes";
+  align-items: center;
+  gap: 0px var(--spacing-medium);
+  animation-name: dropin;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+  animation-delay: var(--ranking-delay);
+  transform: translateY(-50%);
+  opacity: 0;
+}
+
+.trophy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-area: place;
+  width: 50px;
+  height: 50px;
+}
+
+.trophy svg {
+  width: 40px;
+  height: 40px;
+}
+
+.firstPlace {
+  fill: gold;
+}
+
+.secondPlace {
+  fill: silver;
+}
+
+.thirdPlace {
+  fill: orange;
+}
+
+.name,
+.count {
+  font-size: var(--font-size-large);
+  font-family: var(--font-family);
+  white-space: pre-line;
+}
+
+.name {
+  font-weight: bold;
+  grid-area: title;
+  width: 100%;
+  word-break: break-word;
+}
+
+.count {
+  grid-area: votes;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+@keyframes dropin {
+  from {
+    transform: translateY(-50%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Mobile Sizing */
+@media (max-width: 480px) {
+  .name {
+    font-size: var(--font-size-header);
+  }
+}

@@ -1,0 +1,11 @@
+.background {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+  background-color: var(--color-primary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-medium);
+}

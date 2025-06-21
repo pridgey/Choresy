@@ -1,0 +1,18 @@
+.nav {
+  align-items: center;
+  background-color: var(--color-secondary);
+  display: flex;
+  flex-direction: row;
+  height: 70px;
+  justify-content: space-between;
+  padding: var(--spacing-small);
+  width: 100%;
+}
+
+.title {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-jumbo);
+  text-align: center;
+  width: 100%;
+  color: var(--color-white);
+}
