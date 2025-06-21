@@ -21,4 +21,4 @@ You can download the latest Android APK from the [GitHub Releases](https://githu
 
 ### Web
 
-You can also access Choresy as a web application by visiting our [deployed site](https://yourwebsite.com).
+You can also access Choresy as a web application by visiting our [deployed site](https://choresy.pridgey.dev/).
