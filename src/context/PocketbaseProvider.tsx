@@ -1,4 +1,10 @@
-import { createContext, createSignal, JSX, useContext } from "solid-js";
+import {
+  createContext,
+  createSignal,
+  JSX,
+  onMount,
+  useContext,
+} from "solid-js";
 import Pocketbase from "pocketbase";
 import { UserRecord } from "../types/User";
 
@@ -35,4 +41,28 @@ export const useUser = () => {
   const user: UserRecord = context.authStore.record as unknown as UserRecord;
 
   return user;
+};
+
+export const useFamily = () => {
+  const context = useContext(PocketbaseContext);
+
+  let familyID = "";
+
+  if (context?.authStore.isValid) {
+    familyID = context.authStore.record?.family;
+  }
+
+  const [family, setFamily] = createSignal<UserRecord[]>([]);
+
+  onMount(async () => {
+    const familyRecords = await context
+      ?.collection<UserRecord>("users")
+      .getFullList({
+        filter: `family = "${familyID}"`,
+      });
+
+    setFamily(familyRecords ?? []);
+  });
+
+  return family;
 };

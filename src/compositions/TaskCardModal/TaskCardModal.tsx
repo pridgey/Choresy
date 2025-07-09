@@ -53,10 +53,7 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
   const [cooldownType, setCooldownType] = createSignal<
     TaskRecord["cooldown_type"]
   >(props.taskRecord.cooldown_type || "never");
-  const [triggersTask, setTriggersTask] = createSignal<{
-    display: string;
-    value: string;
-  }>();
+  const [triggersTask, setTriggersTask] = createSignal<TaskRecord["id"]>("");
 
   const modalTitle = createMemo(() => {
     switch (viewMode()) {
@@ -69,6 +66,19 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
       case "history":
         return "Task History";
     }
+  });
+
+  // Memoized list of tasks that can be triggered by completing a task
+  const triggerOptions = createMemo(() => {
+    console.log("Creating trigger options...");
+
+    return (tasks() ?? [])
+      .filter((t) => t.id !== props.taskRecord.id)
+      .sort((a, b) => a.title.localeCompare(b.title))
+      .map((t) => ({
+        display: t.title,
+        value: t.id ?? "unknown id",
+      }));
   });
 
   return (
@@ -147,16 +157,11 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
                       Type="number"
                     />
                     <Select
-                      Placeholder="Days"
-                      Label="Unit of Time"
-                      OnChange={(selectedValue) => {
-                        setCooldownType(
-                          selectedValue?.value as TaskRecord["cooldown_type"]
-                        );
-                      }}
-                      Options={[
+                      placeholder="Days"
+                      label="Unit of Time"
+                      onChange={setCooldownType}
+                      options={[
                         {
-                          default: props.taskRecord.cooldown_type === "day",
                           display:
                             cooldownUnit() > 1 || cooldownUnit() === 0
                               ? "days"
@@ -164,41 +169,30 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
                           value: "day",
                         },
                         {
-                          default: props.taskRecord.cooldown_type === "week",
                           display: "week",
                           value: "week",
                         },
                         {
-                          default: props.taskRecord.cooldown_type === "month",
                           display: "month",
                           value: "month",
                         },
                         {
-                          default: props.taskRecord.cooldown_type === "year",
                           display: "year",
                           value: "year",
                         },
                       ]}
+                      value={cooldownType()}
                     />
                   </Flex>
                 </Card>
               </Match>
             </Switch>
             <Select
-              Placeholder="Triggers Task"
-              Label="Competing Task Renews Other Task"
-              OnChange={(selectedValue) => {
-                if (selectedValue) {
-                  setTriggersTask(selectedValue);
-                } else {
-                  setTriggersTask();
-                }
-              }}
-              Options={(tasks() ?? []).map((t) => ({
-                default: triggersTask()?.value === t.id,
-                display: t.title,
-                value: t.id ?? "unknown id",
-              }))}
+              placeholder="Triggers Task"
+              label="Competing Task Renews Other Task"
+              onChange={setTriggersTask}
+              options={triggerOptions()}
+              value={triggersTask()}
             />
             <Flex
               AlignItems="center"
@@ -233,7 +227,7 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
                       cooldown_type: taskRepeatsToggle()
                         ? cooldownType()
                         : "never",
-                      triggers_task: triggersTask()?.value || null,
+                      triggers_task: triggersTask() || null,
                     });
                   props.onClose(true);
                 }}

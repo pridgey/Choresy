@@ -1,5 +1,7 @@
 import moment from "moment";
 import {
+  createEffect,
+  createMemo,
   createResource,
   createSignal,
   Match,
@@ -16,18 +18,26 @@ import { Modal } from "../../components/Modal";
 import { Select } from "../../components/Select";
 import { Text } from "../../components/Text";
 import { Toggle } from "../../components/Toggle/Toggle";
-import { usePocketbase, useUser } from "../../context/PocketbaseProvider";
+import {
+  useFamily,
+  usePocketbase,
+  useUser,
+} from "../../context/PocketbaseProvider";
 import { TaskRecord } from "../../types/Task";
 import { TaskHistoryRecord } from "../../types/TaskHistoryRecord";
 import { PullToRefresh } from "../PullToReload";
 import { TaskCard } from "../TaskCard/TaskCard";
 import styles from "./Tasks.module.css";
-import { AiOutlineCloseCircle } from "solid-icons/ai";
 
 /* Composition that lists all tasks via TaskCards and allows creation of new tasks */
 export const Tasks = () => {
   const pb = usePocketbase();
   const user = useUser();
+  const family = useFamily();
+
+  createEffect(() => {
+    console.log("Family:", family());
+  });
 
   // Utility function to check if any of the fetched tasks are ready to be renewed
   const updatePastDueTasks = async (tasks: TaskRecord[]) => {
@@ -237,10 +247,19 @@ export const Tasks = () => {
   const [cooldownUnit, setCooldownUnit] = createSignal(0);
   const [cooldownType, setCooldownType] =
     createSignal<TaskRecord["cooldown_type"]>("never");
-  const [triggersTask, setTriggersTask] = createSignal<{
-    display: string;
-    value: string;
-  }>();
+  const [triggersTask, setTriggersTask] = createSignal<TaskRecord["id"]>("");
+
+  // Memoized list of tasks that can be triggered by completing a task
+  const triggerOptions = createMemo(() => {
+    console.log("Creating trigger options...");
+
+    return [...(tasks()?.completed ?? []), ...(tasks()?.incompleted ?? [])]
+      .sort((a, b) => a.title.localeCompare(b.title))
+      .map((t) => ({
+        display: t.title,
+        value: t.id ?? "unknown id",
+      }));
+  });
 
   return (
     <section class={styles.container}>
@@ -338,7 +357,7 @@ export const Tasks = () => {
                 cooldown: cooldownUnit() ?? 0,
                 cooldown_type: taskRepeatsToggle() ? cooldownType() : "never",
                 created_by: user.id ?? "unknown user",
-                triggers_task: triggersTask()?.value || null,
+                triggers_task: triggersTask() || null,
               });
 
               // Reset form state
@@ -391,14 +410,10 @@ export const Tasks = () => {
                       Type="number"
                     />
                     <Select
-                      Placeholder="Days"
-                      Label="Unit of Time"
-                      OnChange={(selectedValue) => {
-                        setCooldownType(
-                          selectedValue?.value as TaskRecord["cooldown_type"]
-                        );
-                      }}
-                      Options={[
+                      placeholder="Days"
+                      label="Unit of Time"
+                      onChange={setCooldownType}
+                      options={[
                         {
                           display:
                             cooldownUnit() > 1 || cooldownUnit() === 0
@@ -419,27 +434,28 @@ export const Tasks = () => {
                           value: "year",
                         },
                       ]}
+                      value={cooldownType()}
                     />
                   </Flex>
                 </Card>
               </Match>
             </Switch>
+            {/* Dropdown to pick a task to trigger from this task */}
             <Select
-              Placeholder="Triggers Task"
-              Label="Competing Task Renews Other Task"
-              OnChange={(selectedValue) => {
-                if (selectedValue) {
-                  setTriggersTask(selectedValue);
-                } else {
-                  setTriggersTask();
-                }
-              }}
-              Options={[
-                ...(tasks()?.completed ?? []),
-                ...(tasks()?.incompleted ?? []),
-              ].map((t) => ({
-                display: t.title,
-                value: t.id ?? "unknown id",
+              placeholder="Triggers Task"
+              label="Competing Task Renews Other Task"
+              onChange={setTriggersTask}
+              options={triggerOptions()}
+              value={triggersTask()}
+            />
+            {/* Mark task as private */}
+            <Select
+              placeholder="Who Can See"
+              label="Mark Private"
+              onChange={(selected) => console.log("Selected")}
+              options={family().map((f) => ({
+                value: f.id,
+                display: f.name ?? f.email,
               }))}
             />
           </Flex>

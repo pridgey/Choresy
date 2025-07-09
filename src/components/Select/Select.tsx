@@ -2,36 +2,49 @@ import { Select as KobalteSelect } from "@kobalte/core/select";
 import { FiChevronDown, FiCheck } from "solid-icons/fi";
 import { AiOutlineCloseCircle } from "solid-icons/ai";
 import styles from "./Select.module.css";
-import { Show } from "solid-js";
+import { createMemo, Show } from "solid-js";
 
 interface SelectOptionProps {
   value: string;
   display: string;
-  default?: boolean;
   disabled?: boolean;
 }
 
 type SelectProps = {
-  Error?: string;
-  HelperText?: string;
-  Label: string;
-  OnChange: (newValue: SelectOptionProps | null) => void;
-  Options: SelectOptionProps[];
-  Placeholder?: string;
-  Width?: string;
+  error?: string;
+  helperText?: string;
+  label: string;
+  onChange: (newValue: string | undefined) => void;
+  options: SelectOptionProps[];
+  placeholder?: string;
+  value?: string;
+  width?: string;
 };
 
 export const Select = (props: SelectProps) => {
+  // Memoize everything that could cause re-renders
+  const selectedOption = createMemo(() =>
+    props.options.find((opt) => opt.value === props.value)
+  );
+
+  const options = createMemo(() => props.options);
+
+  const handleChange = (option: SelectOptionProps | null) => {
+    // Only call onChange if the value actually changed
+    if (option?.value !== props.value) {
+      props.onChange(option?.value);
+    }
+  };
+
   return (
     <KobalteSelect
       class={styles.select_root}
-      defaultValue={props.Options.find((o) => o.default)}
-      onChange={props.OnChange}
-      options={props.Options}
+      onChange={handleChange}
+      options={options()}
       optionValue="value"
       optionTextValue="display"
       optionDisabled="disabled"
-      placeholder={props.Placeholder}
+      placeholder={props.placeholder}
       itemComponent={(props) => (
         <KobalteSelect.Item item={props.item} class={styles.select_item}>
           <KobalteSelect.ItemLabel>
@@ -42,14 +55,15 @@ export const Select = (props: SelectProps) => {
           </KobalteSelect.ItemIndicator>
         </KobalteSelect.Item>
       )}
-      style={{ "--select-width": props.Width ?? "100%" }}
+      style={{ "--select-width": props.width ?? "100%" }}
+      value={selectedOption()}
     >
       <KobalteSelect.Label class={styles.select_label}>
-        {props.Label}
+        {props.label}
       </KobalteSelect.Label>
       <KobalteSelect.Trigger
         class={styles.select_trigger}
-        aria-label={props.Label}
+        aria-label={props.label}
       >
         <KobalteSelect.Value<SelectOptionProps> class={styles.select_value}>
           {(state) => {
@@ -74,14 +88,14 @@ export const Select = (props: SelectProps) => {
           <FiChevronDown />
         </KobalteSelect.Icon>
       </KobalteSelect.Trigger>
-      <Show when={props.HelperText}>
+      <Show when={props.helperText}>
         <KobalteSelect.Description class={styles.select_helper}>
-          {props.HelperText}
+          {props.helperText}
         </KobalteSelect.Description>
       </Show>
-      <Show when={props.Error}>
+      <Show when={props.error}>
         <KobalteSelect.ErrorMessage class={styles.select_error}>
-          {props.Error}
+          {props.error}
         </KobalteSelect.ErrorMessage>
       </Show>
       <KobalteSelect.Portal>
