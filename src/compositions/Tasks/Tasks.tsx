@@ -449,7 +449,7 @@ export const Tasks = () => {
               value={triggersTask()}
             />
             {/* Mark task as private */}
-            <Select
+            {/* <Select
               placeholder="Who Can See"
               label="Mark Private"
               onChange={(selected) => console.log("Selected")}
@@ -457,7 +457,7 @@ export const Tasks = () => {
                 value: f.id,
                 display: f.name ?? f.email,
               }))}
-            />
+            /> */}
           </Flex>
         </Modal>
       </Show>
