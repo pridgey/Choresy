@@ -11,12 +11,13 @@ import { Modal } from "../../components/Modal";
 import { TaskRecord } from "../../types/Task";
 import { AiOutlineHistory, AiFillEdit, AiTwotoneDelete } from "solid-icons/ai";
 import { Text } from "../../components/Text";
-import { usePocketbase } from "../../context/PocketbaseProvider";
+import { useFamily, usePocketbase } from "../../context/PocketbaseProvider";
 import { TaskHistory } from "../TaskHistory";
 import { Input } from "../../components/Input";
 import { Toggle } from "../../components/Toggle/Toggle";
 import { Card } from "../../components/Card";
 import { Select } from "../../components/Select";
+import { UserRecord } from "../../types/User";
 
 type TaskCardModalProps = {
   onClose: (refetch?: boolean) => void;
@@ -25,6 +26,7 @@ type TaskCardModalProps = {
 
 export const TaskCardModal = (props: TaskCardModalProps) => {
   const pb = usePocketbase();
+  const family = useFamily();
 
   // Need a list of all tasks to show in dropdown
   // TO-DO: maybe move this to a higher level stateful hook?
@@ -53,7 +55,12 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
   const [cooldownType, setCooldownType] = createSignal<
     TaskRecord["cooldown_type"]
   >(props.taskRecord.cooldown_type || "never");
-  const [triggersTask, setTriggersTask] = createSignal<TaskRecord["id"]>("");
+  const [triggersTask, setTriggersTask] = createSignal<TaskRecord["id"]>(
+    props.taskRecord.triggers_task
+  );
+  const [privateUsers, setPrivateUsers] = createSignal<UserRecord["id"][]>([
+    ...props.taskRecord.can_view,
+  ]);
 
   const modalTitle = createMemo(() => {
     switch (viewMode()) {
@@ -70,8 +77,6 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
 
   // Memoized list of tasks that can be triggered by completing a task
   const triggerOptions = createMemo(() => {
-    console.log("Creating trigger options...");
-
     return (tasks() ?? [])
       .filter((t) => t.id !== props.taskRecord.id)
       .sort((a, b) => a.title.localeCompare(b.title))
@@ -194,6 +199,18 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
               options={triggerOptions()}
               value={triggersTask()}
             />
+            {/* Mark task as private */}
+            <Select
+              placeholder="Who Can See"
+              label="Mark Private"
+              multiple={true}
+              onChange={setPrivateUsers}
+              options={family().map((f) => ({
+                value: f.id,
+                display: f.name ?? f.email,
+              }))}
+              value={privateUsers()}
+            />
             <Flex
               AlignItems="center"
               Direction="row"
@@ -210,6 +227,7 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
                   setTaskRepeatsToggle(false);
                   setViewMode("default");
                   setTriggersTask();
+                  setPrivateUsers([]);
                 }}
                 Variant="outlined"
               >
@@ -228,6 +246,7 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
                         ? cooldownType()
                         : "never",
                       triggers_task: triggersTask() || null,
+                      can_view: privateUsers().length ? privateUsers() : null,
                     });
                   props.onClose(true);
                 }}

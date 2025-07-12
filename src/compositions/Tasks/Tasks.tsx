@@ -28,16 +28,13 @@ import { TaskHistoryRecord } from "../../types/TaskHistoryRecord";
 import { PullToRefresh } from "../PullToReload";
 import { TaskCard } from "../TaskCard/TaskCard";
 import styles from "./Tasks.module.css";
+import { UserRecord } from "../../types/User";
 
 /* Composition that lists all tasks via TaskCards and allows creation of new tasks */
 export const Tasks = () => {
   const pb = usePocketbase();
   const user = useUser();
   const family = useFamily();
-
-  createEffect(() => {
-    console.log("Family:", family());
-  });
 
   // Utility function to check if any of the fetched tasks are ready to be renewed
   const updatePastDueTasks = async (tasks: TaskRecord[]) => {
@@ -248,6 +245,7 @@ export const Tasks = () => {
   const [cooldownType, setCooldownType] =
     createSignal<TaskRecord["cooldown_type"]>("never");
   const [triggersTask, setTriggersTask] = createSignal<TaskRecord["id"]>("");
+  const [privateUsers, setPrivateUsers] = createSignal<UserRecord["id"][]>([]);
 
   // Memoized list of tasks that can be triggered by completing a task
   const triggerOptions = createMemo(() => {
@@ -358,6 +356,7 @@ export const Tasks = () => {
                 cooldown_type: taskRepeatsToggle() ? cooldownType() : "never",
                 created_by: user.id ?? "unknown user",
                 triggers_task: triggersTask() || null,
+                can_view: privateUsers().length ? privateUsers() : null,
               });
 
               // Reset form state
@@ -367,6 +366,7 @@ export const Tasks = () => {
               setCooldownUnit(0);
               setTaskRepeatsToggle(false);
               setTriggersTask();
+              setPrivateUsers([]);
 
               setShowCreateTaskDialog(false);
               refetch();
@@ -449,15 +449,17 @@ export const Tasks = () => {
               value={triggersTask()}
             />
             {/* Mark task as private */}
-            {/* <Select
+            <Select
               placeholder="Who Can See"
               label="Mark Private"
-              onChange={(selected) => console.log("Selected")}
+              multiple={true}
+              onChange={setPrivateUsers}
               options={family().map((f) => ({
                 value: f.id,
                 display: f.name ?? f.email,
               }))}
-            /> */}
+              value={privateUsers()}
+            />
           </Flex>
         </Modal>
       </Show>

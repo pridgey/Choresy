@@ -159,29 +159,39 @@ export const TaskCard = (props: TaskCardProps) => {
                   </Flex>
                 </Match>
               </Switch>
-              <Show
-                when={
-                  props.taskRecord.completed &&
-                  props.taskRecord.cooldown_type !== "never"
-                }
-              >
-                <Text FontSize="mini">
-                  Will renew in{" "}
-                  {calculateTimeUntil(
-                    props.taskRecord.last_completed_at,
-                    props.taskRecord.cooldown,
-                    props.taskRecord.cooldown_type as Exclude<
-                      TaskRecord["cooldown_type"],
-                      "never"
-                    >
-                  )}{" "}
-                  {props.taskRecord.cooldown_type}
-                  {props.taskRecord.cooldown > 1 ||
-                  props.taskRecord.cooldown === 0
-                    ? "s"
-                    : ""}
-                </Text>
-              </Show>
+              <Switch>
+                <Match
+                  when={
+                    props.taskRecord.completed &&
+                    props.taskRecord.cooldown_type !== "never"
+                  }
+                >
+                  <Text FontSize="mini">
+                    Will renew in{" "}
+                    {calculateTimeUntil(
+                      props.taskRecord.last_completed_at,
+                      props.taskRecord.cooldown,
+                      props.taskRecord.cooldown_type as Exclude<
+                        TaskRecord["cooldown_type"],
+                        "never"
+                      >
+                    )}{" "}
+                    {props.taskRecord.cooldown_type}
+                    {props.taskRecord.cooldown > 1 ||
+                    props.taskRecord.cooldown === 0
+                      ? "s"
+                      : ""}
+                  </Text>
+                </Match>
+                <Match
+                  when={
+                    !props.taskRecord.completed &&
+                    props.taskRecord.can_view.length > 0
+                  }
+                >
+                  <Text FontSize="mini">Private Task</Text>
+                </Match>
+              </Switch>
             </Flex>
           </Flex>
         </Card>
