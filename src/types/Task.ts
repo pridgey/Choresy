@@ -13,6 +13,7 @@ export type TaskRecord = {
   created_by: string;
   triggers_task: string;
   can_view: string[];
+  snoozed: boolean;
   expand: {
     last_completed_by: UserRecord;
   };

@@ -1,6 +1,5 @@
 import moment from "moment";
 import {
-  createEffect,
   createMemo,
   createResource,
   createSignal,
@@ -25,10 +24,10 @@ import {
 } from "../../context/PocketbaseProvider";
 import { TaskRecord } from "../../types/Task";
 import { TaskHistoryRecord } from "../../types/TaskHistoryRecord";
+import { UserRecord } from "../../types/User";
 import { PullToRefresh } from "../PullToReload";
 import { TaskCard } from "../TaskCard/TaskCard";
 import styles from "./Tasks.module.css";
-import { UserRecord } from "../../types/User";
 
 /* Composition that lists all tasks via TaskCards and allows creation of new tasks */
 export const Tasks = () => {
@@ -42,7 +41,7 @@ export const Tasks = () => {
     if (tasks?.length) {
       for (const task of tasks) {
         // Determine if task needs to be reset
-        if (task.completed) {
+        if (task.completed || task.snoozed) {
           const now = moment();
           const lastCompleted = moment(task.last_completed_at);
           let isPassedDue = false;
@@ -97,15 +96,19 @@ export const Tasks = () => {
             // Set it ready to do again
             await pb?.collection<TaskRecord>("task").update(task.id, {
               completed: false,
+              snoozed: false,
             });
-            // Add a log so we know
-            await pb?.collection<TaskHistoryRecord>("task_history").create({
-              completed: false,
-              user: "ll64g31qz0j32f3",
-              task: task.id,
-            });
+            if (task.completed && !task.snoozed) {
+              // Add a log so we know
+              await pb?.collection<TaskHistoryRecord>("task_history").create({
+                completed: false,
+                user: "ll64g31qz0j32f3", // AutoRenew user
+                task: task.id,
+              });
+            }
             // Set current record to incomplete
             task.completed = false;
+            task.snoozed = false;
           }
         }
       }
@@ -124,8 +127,10 @@ export const Tasks = () => {
 
     // Organize tasks by incomplete -> complete
     return {
-      completed: [...(tasks?.filter((t) => t.completed) ?? [])],
-      incompleted: [...(tasks?.filter((t) => !t.completed) ?? [])],
+      completed: [...(tasks?.filter((t) => t.completed || t.snoozed) ?? [])],
+      incompleted: [
+        ...(tasks?.filter((t) => !t.completed && !t.snoozed) ?? []),
+      ],
     };
   });
 

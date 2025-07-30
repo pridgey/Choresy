@@ -1,4 +1,8 @@
-import { createSignal, Match, Show, Suspense, Switch } from "solid-js";
+import moment from "moment";
+import { AiOutlineBorder, AiOutlineCheckSquare } from "solid-icons/ai";
+import { BiRegularAlarmSnooze } from "solid-icons/bi";
+import { createSignal, Match, Show, Switch } from "solid-js";
+import { Avatar } from "../../components/Avatar";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { Flex } from "../../components/Flex";
@@ -6,12 +10,9 @@ import { Text } from "../../components/Text";
 import { usePocketbase, useUser } from "../../context/PocketbaseProvider";
 import { TaskRecord } from "../../types/Task";
 import { TaskHistoryRecord } from "../../types/TaskHistoryRecord";
-import styles from "./TaskCard.module.css";
-import { AiOutlineBorder, AiOutlineCheckSquare } from "solid-icons/ai";
-import moment from "moment";
 import { calculateTimeUntil } from "../../utilities/timeHelpers";
-import { Avatar } from "../../components/Avatar";
 import { TaskCardModal } from "../TaskCardModal";
+import styles from "./TaskCard.module.css";
 
 type TaskCardProps = {
   refetchTasks: () => void;
@@ -26,7 +27,7 @@ export const TaskCard = (props: TaskCardProps) => {
   const [taskOptions, setTaskOptions] = createSignal(false);
 
   return (
-    <Suspense fallback="task card loading">
+    <>
       <Button
         OnClick={async () => {
           if (props.taskRecord.id) {
@@ -82,7 +83,11 @@ export const TaskCard = (props: TaskCardProps) => {
         <Card
           padding="medium"
           width="100%"
-          variant={props.taskRecord.completed ? "transparent" : "default"}
+          variant={
+            props.taskRecord.completed || props.taskRecord.snoozed
+              ? "transparent"
+              : "default"
+          }
         >
           <Flex
             Direction="column"
@@ -104,11 +109,18 @@ export const TaskCard = (props: TaskCardProps) => {
               </Text>
               <div class={styles.checkbox}>
                 <Switch>
-                  <Match when={props.taskRecord.completed}>
-                    <AiOutlineCheckSquare />
+                  <Match when={props.taskRecord.snoozed}>
+                    <BiRegularAlarmSnooze />
                   </Match>
-                  <Match when={!props.taskRecord.completed}>
-                    <AiOutlineBorder />
+                  <Match when={props.taskRecord.completed}>
+                    <Switch>
+                      <Match when={props.taskRecord.completed}>
+                        <AiOutlineCheckSquare />
+                      </Match>
+                      <Match when={!props.taskRecord.completed}>
+                        <AiOutlineBorder />
+                      </Match>
+                    </Switch>
                   </Match>
                 </Switch>
               </div>
@@ -208,6 +220,6 @@ export const TaskCard = (props: TaskCardProps) => {
           taskRecord={props.taskRecord}
         />
       </Show>
-    </Suspense>
+    </>
   );
 };

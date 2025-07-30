@@ -10,6 +10,7 @@ import { Flex } from "../../components/Flex";
 import { Modal } from "../../components/Modal";
 import { TaskRecord } from "../../types/Task";
 import { AiOutlineHistory, AiFillEdit, AiTwotoneDelete } from "solid-icons/ai";
+import { BiRegularAlarmSnooze } from "solid-icons/bi";
 import { Text } from "../../components/Text";
 import { useFamily, usePocketbase } from "../../context/PocketbaseProvider";
 import { TaskHistory } from "../TaskHistory";
@@ -18,6 +19,7 @@ import { Toggle } from "../../components/Toggle/Toggle";
 import { Card } from "../../components/Card";
 import { Select } from "../../components/Select";
 import { UserRecord } from "../../types/User";
+import styles from "./TaskCardModa.module.css";
 
 type TaskCardModalProps = {
   onClose: (refetch?: boolean) => void;
@@ -38,7 +40,7 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
   });
 
   const [viewMode, setViewMode] = createSignal<
-    "default" | "edit" | "history" | "delete"
+    "default" | "edit" | "history" | "delete" | "snooze"
   >("default");
 
   // Edit task state
@@ -64,7 +66,7 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
 
   const modalTitle = createMemo(() => {
     switch (viewMode()) {
-      case "default":
+      default:
         return "Task Options";
       case "delete":
         return "Confirm Delete";
@@ -72,6 +74,8 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
         return "Edit Task";
       case "history":
         return "Task History";
+      case "snooze":
+        return "Snooze Task";
     }
   });
 
@@ -91,17 +95,21 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
       <Switch>
         {/* Main view */}
         <Match when={viewMode() === "default"}>
-          <Flex
-            AlignItems="center"
-            Direction="row"
-            JustifyContent="space-around"
-          >
+          <div class={styles.buttonGrid}>
             <Button
               FontSize="header"
               OnClick={() => setViewMode("edit")}
               Variant="text"
             >
               Edit <AiFillEdit />
+            </Button>
+            <Button
+              FontSize="header"
+              OnClick={() => setViewMode("snooze")}
+              Variant="text"
+            >
+              {props.taskRecord.snoozed ? "Un-Snooze" : "Snooze"}{" "}
+              <BiRegularAlarmSnooze />
             </Button>
             <Button
               FontSize="header"
@@ -118,7 +126,7 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
             >
               Delete <AiTwotoneDelete />
             </Button>
-          </Flex>
+          </div>
         </Match>
         {/* Edit Task */}
         <Match when={viewMode() === "edit"}>
@@ -285,6 +293,59 @@ export const TaskCardModal = (props: TaskCardModalProps) => {
                 }}
               >
                 Delete
+              </Button>
+            </Flex>
+          </Flex>
+        </Match>
+        {/* Confirm Snooze */}
+        <Match when={viewMode() === "snooze"}>
+          <Flex Direction="column" Gap="medium">
+            <Text>
+              <Switch>
+                <Match when={!props.taskRecord.snoozed}>
+                  Snoozing the task titled{" "}
+                  <Text Color="primary">"{props.taskRecord.title}"</Text> will
+                  move it to the "completed" section until the next time it is
+                  due. Proceed?
+                </Match>
+                <Match when={props.taskRecord.snoozed}>
+                  Un-Snoozing the task titled{" "}
+                  <Text Color="primary">"{props.taskRecord.title}"</Text> will
+                  make it active again. Proceed?
+                </Match>
+              </Switch>
+            </Text>
+            <Flex
+              AlignItems="center"
+              Direction="row"
+              Gap="medium"
+              JustifyContent="flex-end"
+            >
+              <Button OnClick={() => setViewMode("default")}>Cancel</Button>
+              <Button
+                Color="error"
+                OnClick={async () => {
+                  if (props.taskRecord.snoozed) {
+                    // Un-snooze the task
+                    await pb
+                      ?.collection<TaskRecord>("task")
+                      .update(props.taskRecord.id ?? "unknown task", {
+                        snoozed: false,
+                        completed: false,
+                      });
+                  } else {
+                    // Snooze the task
+                    await pb
+                      ?.collection<TaskRecord>("task")
+                      .update(props.taskRecord.id ?? "unknown task", {
+                        snoozed: true,
+                        completed: false,
+                      });
+                  }
+                  props.onClose(true);
+                }}
+              >
+                {props.taskRecord.snoozed ? "Un-Snooze" : "Snooze"}
               </Button>
             </Flex>
           </Flex>
