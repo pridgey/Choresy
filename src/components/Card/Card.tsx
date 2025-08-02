@@ -17,10 +17,11 @@ type CardProps = {
   bottom?: string;
   children: JSX.Element;
   dropIn?: boolean;
+  gap?: "none" | "small" | "medium" | "large";
   height?: string;
   left?: string;
   margin?: "small" | "medium" | "large";
-  padding?: "mini" | "small" | "medium" | "large";
+  padding?: "mini" | "small" | "medium" | "large" | "none";
   position?: "relative" | "absolute";
   right?: string;
   top?: string;
@@ -54,6 +55,12 @@ export const Card = (props: CardProps) => {
           props.border || props.variant === "outlined"
             ? `1px solid var(--color-${props.border ?? "text"})`
             : "0px",
+        "--card-gap":
+          props.gap === "none"
+            ? "unset"
+            : props.gap
+            ? `var(--spacing-${props.gap})`
+            : "var(--spacing-medium)",
         "--card-shadow":
           props.variant === "outlined"
             ? "none"
@@ -62,9 +69,12 @@ export const Card = (props: CardProps) => {
             : "var(--box-shadow-small)",
         "--card-height": props.height || "unset",
         "--card-width": props.width || "unset",
-        "--card-padding": props.padding
-          ? `var(--spacing-${props.padding})`
-          : "var(--spacing-medium)",
+        "--card-padding":
+          props.padding === "none"
+            ? "unset"
+            : props.padding
+            ? `var(--spacing-${props.padding})`
+            : "var(--spacing-medium)",
       }}
     >
       {props.children}

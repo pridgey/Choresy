@@ -112,7 +112,7 @@ export const TaskCard = (props: TaskCardProps) => {
                   <Match when={props.taskRecord.snoozed}>
                     <BiRegularAlarmSnooze />
                   </Match>
-                  <Match when={props.taskRecord.completed}>
+                  <Match when={!props.taskRecord.snoozed}>
                     <Switch>
                       <Match when={props.taskRecord.completed}>
                         <AiOutlineCheckSquare />
