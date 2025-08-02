@@ -11,6 +11,8 @@ import { usePocketbase, useUser } from "../../context/PocketbaseProvider";
 import { DropdownOptions } from "../DropdownOptions";
 import styles from "./Avatar.module.css";
 import { UserRecord } from "../../types/User";
+import App from "../../App";
+import { AppInviteModal } from "../../compositions/AppInviteModal";
 
 const logout = action(async (pb) => {
   pb.authStore.clear();
@@ -35,6 +37,7 @@ export const Avatar = (props: AvatarProps) => {
   const logoutAction = useAction(logout);
 
   const [optionsOpen, setOptionsOpen] = createSignal<boolean>(false);
+  const [showInviteModal, setShowInviteModal] = createSignal<boolean>(false);
 
   // The user for the avatar bubble
   const user = createMemo(() => {
@@ -160,6 +163,13 @@ export const Avatar = (props: AvatarProps) => {
               Icon: "",
             },
             {
+              Label: "Invite to Choresy",
+              OnClick: () => {
+                setShowInviteModal(true);
+              },
+              Icon: "",
+            },
+            {
               Label: "Buy Me A Pizza Slice?",
               Icon: "🍕",
               OnClick: () => {
@@ -180,6 +190,10 @@ export const Avatar = (props: AvatarProps) => {
             },
           ]}
         />
+      </Show>
+      {/* App Invite Modal */}
+      <Show when={showInviteModal()}>
+        <AppInviteModal OnClose={() => setShowInviteModal(false)} />
       </Show>
     </>
   );
