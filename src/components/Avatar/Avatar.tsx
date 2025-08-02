@@ -7,12 +7,11 @@ import {
   Show,
   Switch,
 } from "solid-js";
+import { AppInviteModal } from "../../compositions/AppInviteModal";
 import { usePocketbase, useUser } from "../../context/PocketbaseProvider";
+import { UserRecord } from "../../types/User";
 import { DropdownOptions } from "../DropdownOptions";
 import styles from "./Avatar.module.css";
-import { UserRecord } from "../../types/User";
-import App from "../../App";
-import { AppInviteModal } from "../../compositions/AppInviteModal";
 
 const logout = action(async (pb) => {
   pb.authStore.clear();
